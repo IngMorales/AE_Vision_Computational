@@ -70,6 +70,7 @@
             // 
             // iniciar
             // 
+            this.iniciar.Enabled = false;
             this.iniciar.Location = new System.Drawing.Point(132, 447);
             this.iniciar.Name = "iniciar";
             this.iniciar.Size = new System.Drawing.Size(75, 23);

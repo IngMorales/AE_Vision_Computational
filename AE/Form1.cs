@@ -15,7 +15,7 @@ namespace AE
     public partial class Form1 : Form
     {
 
-        Alg algo;
+        Individuo Ind=new Individuo();
 
         public Form1()
         {
@@ -28,6 +28,7 @@ namespace AE
             {
                 this.imagen_cargar.SizeMode = PictureBoxSizeMode.StretchImage;
                 imagen_cargar.Image = Image.FromFile(openFileDialog1.FileName);
+                iniciar.Enabled = true;
             }
         }
 
@@ -38,9 +39,9 @@ namespace AE
 
         private void iniciar_Click(object sender, EventArgs e)
         {
-            //Para generar la población inicial
-            List<Individuo> poblacion = new List<Individuo>();
-            poblacion = algo.generar();
+            //Generar población inicial
+            List<Individuo> poblacion=new List<Individuo>();
+            poblacion = Ind.generar_poblacion(100,imagen_cargar.I);
         }
     }
 }

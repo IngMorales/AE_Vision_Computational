@@ -16,13 +16,21 @@ namespace AE.Clases
         public bool Evolucionado { get; set; }  //Determina si ha evolucionado o no
         public int Fenotipo { get; set; }       //Fenotipo
 
-
-        public List<Individuo> Poblacion = new List<Individuo>();
-
         public Individuo()
         {
             Xbinario = new int[10];
             Ybinario = new int[10];
         }
+
+        /// <summary>
+        /// Para generar la población inicial
+        /// </summary>
+        /// <param name="cantidad">Cantidad de individuos</param>
+        /// <returns>Listado de individuos</returns>
+        public List<Individuo> generar_poblacion(int cantidad,int tamano_x, int tamano_y) {
+            List<Individuo> poblacion = new List<Individuo>();
+            return poblacion;
+        }
+
     }
 }
