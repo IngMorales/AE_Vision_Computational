@@ -41,7 +41,17 @@ namespace AE
         {
             //Generar población inicial
             List<Individuo> poblacion=new List<Individuo>();
-            poblacion = Ind.generar_poblacion(100,imagen_cargar.I);
+            poblacion = Ind.generar_poblacion(Convert.ToInt16(num_indi.Text),imagen_cargar.Image.Size.Width,imagen_cargar.Image.Size.Height,
+                imagen_cargar.Image,Convert.ToInt16(t_umbral.Text),Convert.ToInt16(t_umbral_distancia.Text));
+            //Para ubicar los puntos de los individuos en la imagen
+            this.image_final.SizeMode = PictureBoxSizeMode.StretchImage;
+            image_final.Image = imagen_cargar.Image;
+            //Ciclo de evoluación
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
         }
     }
 }
