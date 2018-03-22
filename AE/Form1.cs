@@ -42,42 +42,43 @@ namespace AE
             //Generar población inicial
             List<Individuo> poblacion=new List<Individuo>();
             poblacion = Ind.generar_poblacion(Convert.ToInt16(num_indi.Text),imagen_cargar.Image.Size.Width,imagen_cargar.Image.Size.Height,
-                imagen_cargar.Image,Convert.ToInt16(t_umbral.Text),Convert.ToInt16(t_umbral_distancia.Text));
-            //Para ubicar los puntos de los individuos en la imagen
-            this.image_final.SizeMode = PictureBoxSizeMode.StretchImage;
-            image_final.Image = imagen_cargar.Image;
-            
-            Bitmap bm = new Bitmap(image_final.Image);
-            //for (int i = 0; i < poblacion.Count; i++)
-            //{
-                using (Graphics gr = Graphics.FromImage(image_final.Image))
-                {
-                    //gr.SmoothingMode = SmoothingMode.AntiAlias;
-
-                    Rectangle rect = new Rectangle(poblacion[0].x, poblacion[0].y, 20, 20);
-                    gr.FillEllipse(Brushes.LightGreen, rect);
-                    using (Pen thick_pen = new Pen(Color.Blue, 5))
-                    {
-                        gr.DrawEllipse(thick_pen, rect);
-                    }
-                }
-
-                //image_final.Refresh();
-            image_final.Refresh();
-            //}
-
+            imagen_cargar.Image,Convert.ToInt16(t_umbral.Text),Convert.ToInt16(t_umbral_distancia.Text));
+            graficar_puntos(poblacion);
         }
 
         /// <summary>
-        /// Ubica puntos en la imagen
+        /// Graficar toda la población en la imagen
         /// </summary>
-        /// <param name="x">Coordenada X</param>
-        /// <param name="y">Coordenada Y</param>
-        private void ubicar_puntos(int x, int y,Graphics g)
+        /// <param name="poblacion">Población de puntos</param>
+        private void graficar_puntos(List<Individuo> poblacion)
         {
-            Pen blackpen = new Pen(Color.Black);
-            g.DrawEllipse(blackpen, x, y, 5, 5);
-            this.image_final.Refresh();
+            Image img = imagen_cargar.Image;
+            this.image_final.SizeMode = PictureBoxSizeMode.StretchImage;
+            image_final.Image = imagen_cargar.Image;
+
+            for (int i = 0; i < poblacion.Count; i++)
+            {
+                image_final.Image = ubicar_puntos(poblacion[i].x, poblacion[i].y, image_final.Image);
+            }
+        }
+
+        /// <summary>
+        /// Método para ubicar puntos
+        /// </summary>
+        /// <param name="x">Coordenada del eje X</param>
+        /// <param name="y">Coordenada del eje Y</param>
+        /// <param name="img">Imagen</param>
+        /// <returns>Imagen con los puntos</returns>
+       private Image ubicar_puntos(int x, int y,Image img)
+        {
+            Graphics GR;
+            Bitmap BM = new Bitmap(img);
+            Pen penTest = new System.Drawing.Pen(Brushes.Red);
+            using (GR = Graphics.FromImage(img))
+            {
+                GR.DrawEllipse(penTest, x, y, 5, 5);
+            }
+            return img;
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)

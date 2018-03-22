@@ -37,7 +37,7 @@ namespace AE.Clases
         public List<Individuo> generar_poblacion(int cantidad,int tamano_x, int tamano_y,Image imagen,int umbral,
             int umbral_distancia) {
             List<Individuo> poblacion = new List<Individuo>();
-            Individuo indi = new Individuo();
+            //Individuo indi = new Individuo();
             Random aleatorio = new Random();
             Bitmap fuente = new Bitmap(imagen);
             int gris;
@@ -45,6 +45,7 @@ namespace AE.Clases
             #region Ciclo de generación población inicial
             for(int i = 1; i <= cantidad; i++)
             {
+                Individuo indi = new Individuo();
                 indi.x = aleatorio.Next(tamano_x);
                 indi.y = aleatorio.Next(tamano_y);
                 indi.Evolucionado = false;
@@ -67,6 +68,7 @@ namespace AE.Clases
             #region Ciclo para generar el equidistante
             for(int i = 0; i <cantidad; i++)
             {
+                Individuo indi = new Individuo();
                 indi = poblacion[i];
                 poblacion[i].Xdistante = equidistante(poblacion, indi,umbral_distancia);
             }
