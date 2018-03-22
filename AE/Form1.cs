@@ -44,6 +44,7 @@ namespace AE
             poblacion = Ind.generar_poblacion(Convert.ToInt16(num_indi.Text),imagen_cargar.Image.Size.Width,imagen_cargar.Image.Size.Height,
             imagen_cargar.Image,Convert.ToInt16(t_umbral.Text),Convert.ToInt16(t_umbral_distancia.Text));
             graficar_puntos(poblacion);
+            //Calculo de la calidad de la población
         }
 
         /// <summary>

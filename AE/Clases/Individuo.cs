@@ -18,10 +18,15 @@ namespace AE.Clases
         public bool Evolucionado { get; set; }  //Determina si ha evolucionado o no
         public int Fenotipo { get; set; }       //Fenotipo
 
+        //Atributos para individuo de control de generación
+        public int contador_generacion { get; set; }        //Atributo que permite determinar las generaciones
+        public int[] derivada { get; set; }
+
         public Individuo()
         {
             Xbinario = new int[10];
             Ybinario = new int[10];
+            derivada = new int[10];
         }
 
         /// <summary>
@@ -145,6 +150,22 @@ namespace AE.Clases
                 retornar = 1;
             }
             return retornar;
+        }
+
+        /// <summary>
+        /// Determina la calidad de la población
+        /// </summary>
+        /// <param name="poblacion">Población de individuos</param>
+        /// <returns>Calidad de la población (Flotante)</returns>
+        public float calidad_poblacion(List<Individuo> poblacion)
+        {
+            int acumulador = 0;
+            for(int i = 0; i < poblacion.Count; i++)
+            {
+                acumulador += poblacion[i].Fenotipo;
+            }
+            float calidad = acumulador / poblacion.Count;
+            return calidad;
         }
 
     }
