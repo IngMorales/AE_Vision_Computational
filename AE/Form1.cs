@@ -43,8 +43,27 @@ namespace AE
             List<Individuo> poblacion=new List<Individuo>();
             poblacion = Ind.generar_poblacion(Convert.ToInt16(num_indi.Text),imagen_cargar.Image.Size.Width,imagen_cargar.Image.Size.Height,
             imagen_cargar.Image,Convert.ToInt16(t_umbral.Text),Convert.ToInt16(t_umbral_distancia.Text));
+            Individuo control = new Individuo();
+            control.contador_generacion = 0;
+            acciones_realizadas.Items.Add("Población inicial generada");
+            acciones_realizadas.Refresh();
             graficar_puntos(poblacion);
+            acciones_realizadas.Items.Add("Graficación de la población inicial");
+            acciones_realizadas.Refresh();
             //Calculo de la calidad de la población
+            control.derivada[control.contador_generacion] = Ind.calidad_poblacion(poblacion);
+            acciones_realizadas.Items.Add("Calidad población inicial: " + control.derivada[control.contador_generacion].ToString());
+            acciones_realizadas.Refresh();
+            int derivada = control.calculo_derivada(control.derivada[control.contador_generacion], control.derivada);
+            //Ciclo de evoluciones
+            #region Ciclo de evoluciones
+            float cruce = (float)System.Convert.ToSingle(f_cruce.Text.Replace('.', ','));
+            Ind.Crear_generacion(poblacion, (float)System.Convert.ToSingle(f_cruce.Text.Replace('.', ',')), (float)System.Convert.ToSingle(f_mutacion.Text.Replace('.', ',')));
+            //while (derivada==0)
+            //{
+
+            //}
+            #endregion
         }
 
         /// <summary>
@@ -61,6 +80,7 @@ namespace AE
             {
                 image_final.Image = ubicar_puntos(poblacion[i].x, poblacion[i].y, image_final.Image);
             }
+            this.image_final.Refresh();
         }
 
         /// <summary>

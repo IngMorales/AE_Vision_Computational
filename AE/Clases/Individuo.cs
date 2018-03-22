@@ -20,13 +20,13 @@ namespace AE.Clases
 
         //Atributos para individuo de control de generación
         public int contador_generacion { get; set; }        //Atributo que permite determinar las generaciones
-        public int[] derivada { get; set; }
+        public float[] derivada { get; set; }
 
         public Individuo()
         {
             Xbinario = new int[10];
             Ybinario = new int[10];
-            derivada = new int[10];
+            derivada = new float[10];
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace AE.Clases
             #region Ciclo para calcular el fenotipo
             for(int i = 0; i < cantidad; i++)
             {
-                poblacion[i].valor = poblacion[i].Xdistante + poblacion[i].valor;
+                poblacion[i].Fenotipo = poblacion[i].Xdistante + poblacion[i].valor;
             }
             #endregion
             return poblacion;
@@ -137,7 +137,7 @@ namespace AE.Clases
             int contador=0;
             int distancia;
             int retornar = 0;
-            for(int i = 1; i < poblacion.Count; i++)
+            for(int i = 0; i < poblacion.Count; i++)
             {
                 distancia =Convert.ToInt16(Math.Pow(Math.Pow((poblacion[i].x-ind.x),2)+Math.Pow((poblacion[i].y-ind.y),2),0.5));
                 if (distancia <= umbral_distancia)
@@ -164,8 +164,58 @@ namespace AE.Clases
             {
                 acumulador += poblacion[i].Fenotipo;
             }
-            float calidad = acumulador / poblacion.Count;
+            float calidad = acumulador /(float) poblacion.Count;
             return calidad;
+        }
+
+        /// <summary>
+        /// Calcular la derivada de estabilización
+        /// </summary>
+        /// <param name="calidad">El último dato obtenido (Calidad de la población)</param>
+        /// <param name="derivada">El vector de almacenamiento de la derivada</param>
+        /// <returns>Retorna un 0 si no se ha estabilizado (dCali/dGen!=0)</returns>
+        public int calculo_derivada(float calidad, float[] derivada)
+        {
+            float acumulador=0;
+            int retornar = 0;
+            for (int i = 0; i < derivada.Length; i++)
+            {
+                acumulador += derivada[i];
+            }
+            float promedio = acumulador / derivada.Length;
+            if ((calidad == promedio)&&(calidad!=0))
+            {
+                retornar = 1;
+            }
+            return retornar;
+        }
+
+        public List<Individuo> Crear_generacion(List<Individuo> poblacion,float cruce, float mutacion)
+        {
+            //Determinación del número de individuos a cruzar
+            int numero_cruces = (int)(cruce * (float)poblacion.Count);
+            if (numero_cruces % 2 == 1)
+            {
+                numero_cruces++;
+            }
+            //Determinación del número de individuos a mutar
+            int mutar = poblacion.Count - numero_cruces;
+            //Ciclo de cruces
+            #region Ciclo de cruces
+            for(int i = 1; i <= numero_cruces; i++)
+            {
+                //Ciclo para identificar los dos individuos para cruzar
+                #region Ciclo de identificación de individuos a cruzar
+                Boolean guardian = true;
+                while (guardian)
+                {
+
+                }
+                #endregion
+            }
+            #endregion
+
+            return poblacion;
         }
 
     }
