@@ -234,7 +234,18 @@ namespace AE.Clases
             Random aleatorio = new Random();
             int pivote1 = aleatorio.Next(10);
             int[] ind1_x = new int[10];
+            int[] ind2_x = new int[10];
+            int[] ind1_y = new int[10];
+            int[] ind2_y = new int[10];
+            int[] auxiliar = new int[10];
             ind1_x = poblacion[individuo1].Xbinario;
+            ind2_x = poblacion[individuo2].Xbinario;
+
+            ind1_x[pivote1] = ind2_x[pivote1];
+            pivote1 = aleatorio.Next(10);
+            ind1_y = poblacion[individuo1].Ybinario;
+            ind2_y = poblacion[individuo2].Ybinario;
+            ind1_y[pivote1] = ind2_y[pivote1];
             List<Individuo> pob = new List<Individuo>();
             return pob;
         }
