@@ -204,18 +204,39 @@ namespace AE.Clases
             #region Ciclo de cruces
             for(int i = 1; i <= numero_cruces; i++)
             {
+                int individuo1 = 0;
+                int individuo2=0;
+                Random aleatorio=new Random();
                 //Ciclo para identificar los dos individuos para cruzar
                 #region Ciclo de identificación de individuos a cruzar
                 Boolean guardian = true;
                 while (guardian)
                 {
-
+                    individuo1 = aleatorio.Next(poblacion.Count);
+                    individuo2 = aleatorio.Next(poblacion.Count);
+                    if((poblacion[individuo1].Evolucionado==false)&&(poblacion[individuo2].Evolucionado == false))
+                    {
+                        guardian = false;
+                    }
                 }
                 #endregion
+                List<Individuo> cruzados = new List<Individuo>();
+                cruzados = funcion_cruce(individuo1, individuo2,poblacion);
             }
             #endregion
 
             return poblacion;
+        }
+
+        public List<Individuo> funcion_cruce(int individuo1, int individuo2, List<Individuo> poblacion)
+        {
+            //Identificar el pivote para el cruce en X
+            Random aleatorio = new Random();
+            int pivote1 = aleatorio.Next(10);
+            int[] ind1_x = new int[10];
+            ind1_x = poblacion[individuo1].Xbinario;
+            List<Individuo> pob = new List<Individuo>();
+            return pob;
         }
 
     }

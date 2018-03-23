@@ -57,7 +57,6 @@ namespace AE
             int derivada = control.calculo_derivada(control.derivada[control.contador_generacion], control.derivada);
             //Ciclo de evoluciones
             #region Ciclo de evoluciones
-            float cruce = (float)System.Convert.ToSingle(f_cruce.Text.Replace('.', ','));
             Ind.Crear_generacion(poblacion, (float)System.Convert.ToSingle(f_cruce.Text.Replace('.', ',')), (float)System.Convert.ToSingle(f_mutacion.Text.Replace('.', ',')));
             //while (derivada==0)
             //{
