@@ -44,8 +44,6 @@ namespace AE.Clases
             List<Individuo> poblacion = new List<Individuo>();
             //Individuo indi = new Individuo();
             Random aleatorio = new Random();
-            Bitmap fuente = new Bitmap(imagen);
-            int gris;
             //Ciclo para generar población inicial
             #region Ciclo de generación población inicial
             for(int i = 1; i <= cantidad; i++)
@@ -56,16 +54,7 @@ namespace AE.Clases
                 indi.Evolucionado = false;
                 indi.Xbinario = binario(indi.x);
                 indi.Ybinario = binario(indi.y);
-                Color pixel = fuente.GetPixel(indi.x, indi.y);
-                gris = Convert.ToInt16(pixel.R * 0.3f + pixel.G * 0.59f + pixel.B * 0.11f);
-                if(gris<=umbral)
-                {
-                    indi.valor = 1;
-                }
-                else
-                {
-                    indi.valor = 0;
-                }
+                indi.valor = calculo_valor(imagen, indi, umbral);
                 poblacion.Add(indi);
             }
             #endregion
@@ -190,7 +179,8 @@ namespace AE.Clases
             return retornar;
         }
 
-        public List<Individuo> Crear_generacion(List<Individuo> poblacion,float cruce, float mutacion)
+        public List<Individuo> Crear_generacion(List<Individuo> poblacion,float cruce, float mutacion,
+            int umbral_distancia,Image imagen,int umbral)
         {
             //Determinación del número de individuos a cruzar
             int numero_cruces = (int)(cruce * (float)poblacion.Count);
@@ -199,7 +189,7 @@ namespace AE.Clases
                 numero_cruces++;
             }
             //Determinación del número de individuos a mutar
-            int mutar = poblacion.Count - numero_cruces;
+            int numero_mutaciones = poblacion.Count - numero_cruces;
             //Ciclo de cruces
             #region Ciclo de cruces
             for(int i = 1; i <= numero_cruces; i++)
@@ -221,33 +211,222 @@ namespace AE.Clases
                 }
                 #endregion
                 List<Individuo> cruzados = new List<Individuo>();
-                cruzados = funcion_cruce(individuo1, individuo2,poblacion);
+                cruzados = funcion_cruce(individuo1, individuo2,poblacion,umbral_distancia,imagen,umbral);
+                poblacion[individuo1] = cruzados[0];
+                poblacion[individuo2] = cruzados[1];
+                poblacion[individuo1].Evolucionado = true;
+                poblacion[individuo2].Evolucionado = true;
             }
             #endregion
-
+            //Ciclo de mutaciones
+            #region Ciclo de mutaciones
+            for(int i = 1; i <= numero_mutaciones; i++)
+            {
+                int individuo1 = 0;
+                Random aleatorio = new Random();
+                //Ciclo de individuos a mutar
+                #region Ciclo de identificación de individuos a mutar
+                Boolean guardian = true;
+                while (guardian)
+                {
+                    individuo1 = aleatorio.Next(poblacion.Count);
+                    if (poblacion[individuo1].Evolucionado == false)
+                    {
+                        guardian = false;
+                    }
+                }
+                #endregion
+            }
+            #endregion
             return poblacion;
         }
 
-        public List<Individuo> funcion_cruce(int individuo1, int individuo2, List<Individuo> poblacion)
+        /// <summary>
+        /// Función de cruces de dos individuos
+        /// </summary>
+        /// <param name="individuo1">(Int) Individuo 1 de la población</param>
+        /// <param name="individuo2">(Int) Individuo 2 de la población</param>
+        /// <param name="poblacion">(list<Individuo>)Población</param>
+        /// <param name="umbral_distancia">(Int)Umbral de distancia entre individuos</param>
+        /// <param name="imagen">(Image)Imagen a tratar</param>
+        /// <param name="umbral">(Int)Umbral de conversión a grises</param>
+        /// <returns>(Lis<Individuo>)Individuos cruzados</returns>
+        public List<Individuo> funcion_cruce(int individuo1, int individuo2, List<Individuo> poblacion,
+            int umbral_distancia,Image imagen,int umbral)
         {
             //Identificar el pivote para el cruce en X
             Random aleatorio = new Random();
-            int pivote1 = aleatorio.Next(10);
+            int pivote = aleatorio.Next(10);
+            //Para almacenar los parámetros de los individuos hijos
             int[] ind1_x = new int[10];
             int[] ind2_x = new int[10];
             int[] ind1_y = new int[10];
             int[] ind2_y = new int[10];
+            //Variable auxiliar para la función cruce
             int[] auxiliar = new int[10];
             ind1_x = poblacion[individuo1].Xbinario;
             ind2_x = poblacion[individuo2].Xbinario;
-
-            ind1_x[pivote1] = ind2_x[pivote1];
-            pivote1 = aleatorio.Next(10);
+            //Almaceno antes de realizar cruce en X
+            auxiliar = ind1_x;
+            //Realizo el cruce en X
+            ind1_x[pivote] = ind2_x[pivote];
+            ind2_x[pivote] = auxiliar[pivote];
+            pivote = aleatorio.Next(10);
             ind1_y = poblacion[individuo1].Ybinario;
             ind2_y = poblacion[individuo2].Ybinario;
-            ind1_y[pivote1] = ind2_y[pivote1];
+            //Almaceno antes de realizar el cruce en Y
+            auxiliar = ind1_y;
+            //Realizo el cruce en Y
+            ind1_y[pivote] = ind2_y[pivote];
+            ind2_y[pivote] = auxiliar[pivote];
+            //Determino el fenotipo de los dos individuos cruzados generados
+            #region Fenotipo de hijos y selección de los dos mejores
+            #region Generación de individuos hijos
+            Individuo hijo1 = new Individuo();
+            hijo1.Xbinario = ind1_x;
+            hijo1.Ybinario = ind1_y;
+            hijo1.x = binario_decimal(hijo1.Xbinario);
+            hijo1.y = binario_decimal(hijo1.Ybinario);
+            hijo1.Xdistante = equidistante(poblacion, hijo1, umbral_distancia);
+            hijo1.valor = calculo_valor(imagen, hijo1, umbral);
+            hijo1.Fenotipo = hijo1.Xdistante + hijo1.valor;
+            Individuo hijo2 = new Individuo();
+            hijo2.Xbinario = ind2_x;
+            hijo2.Ybinario = ind2_y;
+            hijo2.x = binario_decimal(hijo2.Xbinario);
+            hijo2.y = binario_decimal(hijo2.Ybinario);
+            hijo2.Xdistante = equidistante(poblacion, hijo2, umbral_distancia);
+            hijo2.valor = calculo_valor(imagen, hijo2,umbral);
+            hijo2.Fenotipo = hijo2.Xdistante + hijo2.valor;
+            #endregion
+            #region Selección de los dos mejores
             List<Individuo> pob = new List<Individuo>();
+            int[] fenotipos = new int[4];
+            int[] mejores = new int[2];
+            fenotipos[0] = poblacion[individuo1].Fenotipo;
+            fenotipos[1] = poblacion[individuo2].Fenotipo;
+            fenotipos[2] = hijo1.Fenotipo;
+            fenotipos[3] = hijo2.Fenotipo;
+            int max = 0;
+            int contador = 0;
+            for(int i = 0; i <= 1; i++)
+            {
+                for(int j = 0; j <= 3; j++)
+                {
+                    for(int k = 0; k <= 3; k++)
+                    {
+                        if ((fenotipos[j] > fenotipos[k])&&(j!=k))
+                        {
+                            max = j;
+                        }
+                    }
+                }
+                #region Selección de los dos mejores
+                if ((contador == 1) && (max == 1))
+                {
+                    max = 0;
+                }
+                if ((max == 1)&&(contador==0))
+                {
+                    contador=1;
+                }
+                switch (max)
+                {
+                    case 0:
+                        pob.Add(poblacion[individuo1]);
+                        break;
+                    case 1:
+                        pob.Add(poblacion[individuo2]);
+                        break;
+                    case 2:
+                        pob.Add(hijo1);
+                        break;
+                    case 3:
+                        pob.Add(hijo2);
+                        break;
+                }
+                #endregion
+                fenotipos[max] = 0;
+                max = 1;
+            }
+            #endregion
+            #endregion
+
             return pob;
+        }
+
+        public Individuo funcion_mutacion(Individuo individuo,List<Individuo> Poblacion)
+        {
+            Individuo copia_mutada = new Individuo();
+            copia_mutada = individuo;
+            Random aleatorio = new Random();
+            //Mutación en X
+            #region Mutación en X
+            int pivote = aleatorio.Next(10);
+            switch (copia_mutada.Xbinario[pivote])
+            {
+                case 0:
+                    copia_mutada.Xbinario[pivote] = 1;
+                    break;
+                case 1:
+                    copia_mutada.Xbinario[pivote] = 0;
+                    break;
+            }
+            #endregion
+            //Mutación en Y
+            #region Mutación en Y
+            pivote = aleatorio.Next(10);
+            switch (copia_mutada.Ybinario[pivote])
+            {
+                case 0:
+                    copia_mutada.Ybinario[pivote] = 1;
+                    break;
+                case 1:
+                    copia_mutada.Ybinario[pivote] = 0;
+                    break;
+            }
+            #endregion
+
+            return individuo;
+        }
+
+        /// <summary>
+        /// Función para convertir de un vector binario a un decimal tipo entero
+        /// </summary>
+        /// <param name="numero">Arreglo de tipo binario</param>
+        /// <returns>(Int) Entero valor convertido</returns>
+        public int binario_decimal(int[] numero)
+        {
+            int retorno = 0;
+            for(int i = 0; i < numero.Length; i++)
+            {
+                retorno += numero[i] * (int)Math.Pow(2, i);
+            }
+            return retorno;
+        }
+
+        /// <summary>
+        /// Función para calcular el valor de la imagen en un pixel X,Y
+        /// </summary>
+        /// <param name="imagen">(Image) Imagen a tratar</param>
+        /// <param name="ind">(Individuo) Individio a analizar</param>
+        /// <param name="umbral">(int) Umbral de conversión en escala de grises</param>
+        /// <returns>(Int)Retorna 0 o 1 dependiendo se se encuentra sobre un punto negro de escala de gris</returns>
+        public int calculo_valor(Image imagen,Individuo ind,int umbral)
+        {
+            int retornar = 0;
+            Bitmap fuente= new Bitmap(imagen);
+            Color pixel = fuente.GetPixel(ind.x, ind.y);
+            int gris = Convert.ToInt16(pixel.R * 0.3f + pixel.G * 0.59f + pixel.B * 0.11f);
+            if (gris <= umbral)
+            {
+                retornar = 1;
+            }
+            else
+            {
+                retornar = 0;
+            }
+            return retornar;
         }
 
     }
