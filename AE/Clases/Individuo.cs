@@ -179,6 +179,16 @@ namespace AE.Clases
             return retornar;
         }
 
+        /// <summary>
+        /// Crea generaciones a partir de parámetros
+        /// </summary>
+        /// <param name="poblacion">(list<Individuo>)Población inicial</param>
+        /// <param name="cruce">(Float)Factor de cruce</param>
+        /// <param name="mutacion">(Float)Factor de mutación</param>
+        /// <param name="umbral_distancia">(Int)Umbral de distancia entre individuos</param>
+        /// <param name="imagen">(Imagen)Imagen a procesar</param>
+        /// <param name="umbral">(Int)Umbral de conversión en escala de grises</param>
+        /// <returns>(List<Individuo>)Población generada</returns>
         public List<Individuo> Crear_generacion(List<Individuo> poblacion,float cruce, float mutacion,
             int umbral_distancia,Image imagen,int umbral)
         {
@@ -188,8 +198,9 @@ namespace AE.Clases
             {
                 numero_cruces++;
             }
+            numero_cruces = numero_cruces / 2;
             //Determinación del número de individuos a mutar
-            int numero_mutaciones = poblacion.Count - numero_cruces;
+            int numero_mutaciones = poblacion.Count - (numero_cruces*2);
             //Ciclo de cruces
             #region Ciclo de cruces
             for(int i = 1; i <= numero_cruces; i++)
@@ -236,6 +247,8 @@ namespace AE.Clases
                     }
                 }
                 #endregion
+                poblacion[individuo1] = funcion_mutacion(poblacion[individuo1], poblacion, imagen, umbral, umbral_distancia);
+                poblacion[individuo1].Evolucionado = true;
             }
             #endregion
             return poblacion;
@@ -254,31 +267,61 @@ namespace AE.Clases
         public List<Individuo> funcion_cruce(int individuo1, int individuo2, List<Individuo> poblacion,
             int umbral_distancia,Image imagen,int umbral)
         {
+            //Ciclo que determina que el cruce está permitido (se encuentra dentro de los rangos de la imagen)
+            //si no se define nuevo pivote
+            #region Ciclo de cruce permitido en X
             //Identificar el pivote para el cruce en X
             Random aleatorio = new Random();
-            int pivote = aleatorio.Next(10);
-            //Para almacenar los parámetros de los individuos hijos
+            int pivote = 0;
+            int prueba1 = 0;
+            int prueba2 = 0;
+            //Para almacenar los parámetros de los individuos hijos                
             int[] ind1_x = new int[10];
             int[] ind2_x = new int[10];
             int[] ind1_y = new int[10];
             int[] ind2_y = new int[10];
             //Variable auxiliar para la función cruce
             int[] auxiliar = new int[10];
-            ind1_x = poblacion[individuo1].Xbinario;
-            ind2_x = poblacion[individuo2].Xbinario;
-            //Almaceno antes de realizar cruce en X
-            auxiliar = ind1_x;
-            //Realizo el cruce en X
-            ind1_x[pivote] = ind2_x[pivote];
-            ind2_x[pivote] = auxiliar[pivote];
-            pivote = aleatorio.Next(10);
-            ind1_y = poblacion[individuo1].Ybinario;
-            ind2_y = poblacion[individuo2].Ybinario;
-            //Almaceno antes de realizar el cruce en Y
-            auxiliar = ind1_y;
-            //Realizo el cruce en Y
-            ind1_y[pivote] = ind2_y[pivote];
-            ind2_y[pivote] = auxiliar[pivote];
+            Boolean guardian = true;
+            while (guardian)
+            {
+                pivote = aleatorio.Next(10);
+                ind1_x = poblacion[individuo1].Xbinario;
+                ind2_x = poblacion[individuo2].Xbinario;
+                //Almaceno antes de realizar cruce en X
+                auxiliar = ind1_x;
+                //Realizo el cruce en X
+                ind1_x[pivote] = ind2_x[pivote];
+                ind2_x[pivote] = auxiliar[pivote];
+                prueba1 = binario_decimal(ind1_x);
+                prueba2 = binario_decimal(ind2_x);
+                if ((prueba1 < imagen.Size.Width) && (prueba2 < imagen.Size.Width))
+                {
+                    guardian = false;
+                }
+            }
+            #endregion
+            //Ciclo de cruce permitido en Y
+            #region Ciclo de cruce permitido en Y
+            guardian = true;
+            while (guardian)
+            {
+                pivote = aleatorio.Next(10);
+                ind1_y = poblacion[individuo1].Ybinario;
+                ind2_y = poblacion[individuo2].Ybinario;
+                //Almaceno antes de realizar el cruce en Y
+                auxiliar = ind1_y;
+                //Realizo el cruce en Y
+                ind1_y[pivote] = ind2_y[pivote];
+                ind2_y[pivote] = auxiliar[pivote];
+                prueba1 = binario_decimal(ind1_y);
+                prueba2 = binario_decimal(ind2_y);
+                if ((prueba1 < imagen.Size.Height) && (prueba2 < imagen.Size.Height))
+                {
+                    guardian = false;
+                }
+            }
+            #endregion
             //Determino el fenotipo de los dos individuos cruzados generados
             #region Fenotipo de hijos y selección de los dos mejores
             #region Generación de individuos hijos
@@ -355,39 +398,85 @@ namespace AE.Clases
             return pob;
         }
 
-        public Individuo funcion_mutacion(Individuo individuo,List<Individuo> Poblacion)
+        /// <summary>
+        /// Función mutación de un solo individuo
+        /// </summary>
+        /// <param name="individuo">(Individuo) Individuo a mutar</param>
+        /// <param name="Poblacion">(Lis<Individuo>)Población para determinar características como Xdistante</param>
+        /// <param name="imagen">(Image)Para extraer características como valor</param>
+        /// <param name="umbral">(Int)Determina el umbral para conversión en escala de grises</param>
+        /// <param name="umbral_distancia">(Int)Umbral de distancia entre individuos</param>
+        /// <returns></returns>
+        public Individuo funcion_mutacion(Individuo individuo,List<Individuo> Poblacion, Image imagen, int umbral,
+            int umbral_distancia)
         {
             Individuo copia_mutada = new Individuo();
             copia_mutada = individuo;
+            int pivote = 0;
+            Boolean guardia = true;
+            int prueba = 0;
             Random aleatorio = new Random();
             //Mutación en X
             #region Mutación en X
-            int pivote = aleatorio.Next(10);
-            switch (copia_mutada.Xbinario[pivote])
+            while (guardia)
             {
-                case 0:
-                    copia_mutada.Xbinario[pivote] = 1;
-                    break;
-                case 1:
-                    copia_mutada.Xbinario[pivote] = 0;
-                    break;
+                pivote = aleatorio.Next(10);
+                switch (copia_mutada.Xbinario[pivote])
+                {
+                    case 0:
+                        copia_mutada.Xbinario[pivote] = 1;
+                        break;
+                    case 1:
+                        copia_mutada.Xbinario[pivote] = 0;
+                        break;
+                }
+                prueba = binario_decimal(copia_mutada.Xbinario);
+                if (prueba < imagen.Size.Width)
+                {
+                    guardia = false;
+                }
             }
             #endregion
             //Mutación en Y
             #region Mutación en Y
-            pivote = aleatorio.Next(10);
-            switch (copia_mutada.Ybinario[pivote])
+            guardia = true;
+            while (guardia)
             {
-                case 0:
-                    copia_mutada.Ybinario[pivote] = 1;
-                    break;
-                case 1:
-                    copia_mutada.Ybinario[pivote] = 0;
-                    break;
+                pivote = aleatorio.Next(10);
+                switch (copia_mutada.Ybinario[pivote])
+                {
+                    case 0:
+                        copia_mutada.Ybinario[pivote] = 1;
+                        break;
+                    case 1:
+                        copia_mutada.Ybinario[pivote] = 0;
+                        break;
+                }
+                prueba = binario_decimal(copia_mutada.Ybinario);
+                if (prueba < imagen.Size.Height)
+                {
+                    guardia = false;
+                }
             }
             #endregion
-
-            return individuo;
+            copia_mutada.x = binario_decimal(copia_mutada.Xbinario);
+            copia_mutada.y = binario_decimal(copia_mutada.Ybinario);
+            copia_mutada.valor = calculo_valor(imagen, copia_mutada, umbral);
+            copia_mutada.Xdistante = equidistante(Poblacion, copia_mutada, umbral_distancia);
+            copia_mutada.Fenotipo = copia_mutada.valor + copia_mutada.Xdistante;
+            //Selección del mejor individuo
+            #region mejor individuo
+            Individuo enviar = new Individuo();
+            if (copia_mutada.Fenotipo >= individuo.Fenotipo)
+            {
+                enviar = copia_mutada;
+            }
+            else
+            {
+                enviar = individuo;
+            }
+            #endregion
+            return enviar;
         }
 
         /// <summary>
@@ -427,6 +516,21 @@ namespace AE.Clases
                 retornar = 0;
             }
             return retornar;
+        }
+
+        /// <summary>
+        /// Ubica la caracteristica Evolucionado de todos los individuos en false para
+        /// que estén listos en el momento de crear una nueva generación
+        /// </summary>
+        /// <param name="Poblacion">(List<Individuo>)Población a alistar</param>
+        /// <returns>(List<Individuo>)Población lista para volver a generar</returns>
+        public List<Individuo> alistar_poblacion(List<Individuo> Poblacion)
+        {
+            for(int i = 0; i < Poblacion.Count; i++)
+            {
+                Poblacion[i].Evolucionado = false;
+            }
+            return Poblacion;
         }
 
     }

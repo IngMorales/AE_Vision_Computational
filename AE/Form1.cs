@@ -55,15 +55,30 @@ namespace AE
             acciones_realizadas.Items.Add("Calidad población inicial: " + control.derivada[control.contador_generacion].ToString());
             acciones_realizadas.Refresh();
             int derivada = control.calculo_derivada(control.derivada[control.contador_generacion], control.derivada);
+            int contador = 0;
             //Ciclo de evoluciones
             #region Ciclo de evoluciones
-            Ind.Crear_generacion(poblacion, (float)System.Convert.ToSingle(f_cruce.Text.Replace('.', ',')), (float)System.Convert.ToSingle(f_mutacion.Text.Replace('.', ',')),
-                Convert.ToInt16(t_umbral_distancia.Text),imagen_cargar.Image, Convert.ToInt16(t_umbral.Text));
-            //while (derivada==0)
-            //{
-
-            //}
+            while (derivada == 0)
+            {
+                poblacion = Ind.Crear_generacion(poblacion, (float)System.Convert.ToSingle(f_cruce.Text.Replace('.', ',')), (float)System.Convert.ToSingle(f_mutacion.Text.Replace('.', ',')),
+                    Convert.ToInt16(t_umbral_distancia.Text), imagen_cargar.Image, Convert.ToInt16(t_umbral.Text));
+                poblacion = Ind.alistar_poblacion(poblacion);
+                control.contador_generacion++;
+                contador++;
+                acciones_realizadas.Items.Add("Generación: " + contador.ToString());
+                acciones_realizadas.Refresh();
+                if (control.contador_generacion == 10)
+                {
+                    control.contador_generacion = 0;
+                }
+                control.derivada[control.contador_generacion] = Ind.calidad_poblacion(poblacion);
+                acciones_realizadas.Items.Add("Calidad de la población: " + control.derivada[control.contador_generacion].ToString());
+                acciones_realizadas.Refresh();
+                derivada = control.calculo_derivada(control.derivada[control.contador_generacion], control.derivada);
+            }
             #endregion
+            acciones_realizadas.Items.Add("Proceso terminado");
+            acciones_realizadas.Refresh();
         }
 
         /// <summary>
